@@ -185,7 +185,7 @@ export default function Navbar() {
                 <div className="relative" ref={dropdownRef}>
                   <button 
                     onClick={handleBellClick}
-                    className={`p-2 rounded-full transition-colors relative ${isAdminRoute ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'}`}
+                    className={`p-2 rounded-full transition-colors cursor-pointer relative ${isAdminRoute ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'}`}
                   >
                     🔔
                     {unreadCount > 0 && (

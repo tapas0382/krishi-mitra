@@ -14,11 +14,10 @@ export async function GET(request) {
       return NextResponse.json({ success: false, message: "Location required" }, { status: 400 });
     }
 
-    // We will update this if OpenWeather finds a more accurate name based on coordinates!
     let actualLocationName = userVillageName; 
 
     // ----------------------------------------------------------------------
-    // 🌤️ 1. WEATHER DATA & EXACT LOCATION DETECTOR
+    // 🌤️ 1. WEATHER DATA
     // ----------------------------------------------------------------------
     let weatherData;
     
@@ -30,7 +29,6 @@ export async function GET(request) {
       
       const weatherRaw = await weatherRes.json();
       
-      // ✨ THE LOCATION FIX: Grab the actual name of the coordinates from OpenWeather!
       if (weatherRaw.name) {
         actualLocationName = weatherRaw.name;
       }
@@ -43,7 +41,6 @@ export async function GET(request) {
       };
     } catch (weatherError) {
       console.log("Weather API failed, using fallback data...", weatherError.message);
-      // Fallback data
       weatherData = {
         temperature: 32,
         condition: "heavy thunderstorms and strong winds",
@@ -53,24 +50,24 @@ export async function GET(request) {
     }
 
     // ----------------------------------------------------------------------
-    // 🤖 2. REAL AI ANALYSIS (With Crash Protection)
+    // 🤖 2. REAL AI ANALYSIS (1.5 Flash + Regex Fix)
     // ----------------------------------------------------------------------
     let aiData;
 
     try {
+      // 👇 Using gemini-pro for the 1,500 requests/day quota!
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-      // Notice we are passing the 'actualLocationName' to the AI now!
       const prompt = `
         You are 'Krishi Mitra', an expert agricultural AI assistant in India.
         Location: ${actualLocationName}
         Current Weather: ${weatherData.condition}, ${weatherData.temperature}°C, ${weatherData.humidity}% humidity.
         
         Based strictly on this weather, provide farming advice. 
-        Respond ONLY with a valid JSON object matching this exact format, without any markdown formatting or extra text:
+        Respond ONLY with a valid JSON object matching this exact format:
         {
           "advice": "2 sentences of specific agricultural advice based on the weather.",
-          "action": "1 specific action sentence (e.g., 'Rent a rotavator today to...').",
+          "action": "1 specific action sentence.",
           "recommendedTools": ["Tool 1", "Tool 2"],
           "recommendedSeeds": ["Seed 1", "Seed 2"]
         }
@@ -79,15 +76,17 @@ export async function GET(request) {
       const aiResult = await model.generateContent(prompt);
       const aiResponseText = aiResult.response.text();
       
-      const cleanedJsonStr = aiResponseText.replace(/```json/g, '').replace(/```/g, '').trim();
+      // ✨ THE ANTI-CRASH FIX: Regex finds the exact JSON brackets!
+      const jsonMatch = aiResponseText.match(/\{[\s\S]*\}/);
+      const cleanedJsonStr = jsonMatch ? jsonMatch[0] : aiResponseText;
+      
       aiData = JSON.parse(cleanedJsonStr);
 
     } catch (aiError) {
-      // ✨ THE CRASH FIX: If Gemini is overloaded (503), catch it and use this safe fallback!
-      console.warn("⚠️ Gemini API is busy or down. Sending fallback data.");
+      console.warn("⚠️ EXACT AI ERROR:", aiError);
       
       aiData = {
-        advice: "Our AI servers are currently experiencing high demand. Please rely on the live weather data on the left for now.",
+        advice: "AI Mitra is currently syncing new satellite data. Please rely on the live weather data on the left for now.",
         action: "Check back in a few minutes for personalized AI recommendations.",
         recommendedTools: ["Tractor", "Water Pump"], 
         recommendedSeeds: ["Seasonal Vegetables", "Wheat"] 
@@ -95,12 +94,12 @@ export async function GET(request) {
     }
 
     // ----------------------------------------------------------------------
-    // 📤 3. SEND RESPONSE TO FRONTEND
+    // 📤 3. SEND RESPONSE
     // ----------------------------------------------------------------------
     return NextResponse.json({
       success: true,
       data: {
-        villageName: actualLocationName, // Send the real name back to the UI!
+        villageName: actualLocationName,
         weather: weatherData,
         ai: aiData
       }

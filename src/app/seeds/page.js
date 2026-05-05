@@ -144,13 +144,13 @@ export default function SeedExchange() {
           <div className="bg-white p-1 rounded-xl shadow-sm border border-slate-200 inline-flex">
             <button 
               onClick={() => setViewType('offer')}
-              className={`px-6 py-3 rounded-lg font-bold transition-all ${viewType === 'offer' ? 'bg-green-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
+              className={`px-6 py-3 cursor-pointer rounded-lg font-bold transition-all ${viewType === 'offer' ? 'bg-green-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
             >
               Available Seeds
             </button>
             <button 
               onClick={() => setViewType('request')}
-              className={`px-6 py-3 rounded-lg font-bold transition-all ${viewType === 'request' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
+              className={`px-6 py-3 cursor-pointer rounded-lg font-bold transition-all ${viewType === 'request' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
             >
               Seeds Needed
             </button>
@@ -159,7 +159,7 @@ export default function SeedExchange() {
 
         {/* Search Bar */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-10 flex flex-col md:flex-row gap-4 items-center">
-          <button onClick={handleGetLocation} className="w-full md:w-auto bg-slate-100 border border-slate-300 text-slate-700 px-4 py-3 rounded-lg font-medium hover:bg-slate-200 transition">
+          <button onClick={handleGetLocation} className="w-full md:w-auto bg-slate-100 border border-slate-300 text-slate-700 px-4 py-3 rounded-lg font-medium hover:bg-slate-200 transition cursor-pointer">
             📍 Use My Location
           </button>
           <input type="text" readOnly value={locationStr} placeholder="Find seeds near me..." className="w-full p-3 border border-slate-300 rounded-lg bg-slate-50 outline-none text-slate-600" />
@@ -216,7 +216,7 @@ export default function SeedExchange() {
                     </span>
                     <button 
                     onClick={() => handleOpenOrder(seed)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewType === 'offer' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-orange-500 hover:bg-orange-600 text-white'}`}>
+                    className={`px-4 cursor-pointer py-2 rounded-lg font-medium transition-colors ${viewType === 'offer' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-orange-500 hover:bg-orange-600 text-white'}`}>
                       Order Seeds
                     </button>
                   </div>
@@ -274,7 +274,7 @@ export default function SeedExchange() {
                   <button 
                     onClick={() => setPacketCount(Math.max(1, packetCount - 1))}
                     disabled={packetCount <= 1}
-                    className="w-12 h-12 bg-white rounded-xl shadow-sm text-2xl font-bold text-slate-600 hover:text-red-500 disabled:opacity-50 transition-colors"
+                    className="w-12 h-12 bg-white rounded-xl shadow-sm text-2xl font-bold text-slate-600 hover:text-red-500 disabled:opacity-50 transition-colors cursor-pointer"
                   >
                     -
                   </button>
@@ -284,7 +284,7 @@ export default function SeedExchange() {
                   <button 
                     onClick={() => setPacketCount(packetCount + 1)}
                     disabled={!canAddMore}
-                    className="w-12 h-12 bg-white rounded-xl shadow-sm text-2xl font-bold text-slate-600 hover:text-green-500 disabled:opacity-50 transition-colors"
+                    className="w-12 h-12 bg-white rounded-xl shadow-sm text-2xl font-bold text-slate-600 hover:text-green-500 disabled:opacity-50 transition-colors cursor-pointer"
                   >
                     +
                   </button>
@@ -309,14 +309,14 @@ export default function SeedExchange() {
               <div className="flex gap-2 mt-6">
                 <button 
                   onClick={() => setOrderModalSeed(null)} 
-                  className="flex-1 py-2 font-bold text-slate-500 hover:bg-red-100 rounded-lg transition-colors bg-red-600 text-white"
+                  className="flex-1 py-2 font-bold text-slate-500 hover:bg-red-100 rounded-lg transition-colors bg-red-600 text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 
                 <Link 
                   href={`/messages?userId=${orderModalSeed.owner?._id}&name=${orderModalSeed.owner?.name}`}
-                  className="flex-1 py-2 text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex justify-center items-center gap-1"
+                  className="flex-1 py-2 text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex justify-center items-center gap-1 cursor-pointer"
                 >
                   💬 Message
                 </Link>
@@ -324,7 +324,7 @@ export default function SeedExchange() {
                 <button 
                   onClick={() => handleConfirmOrder(totalWeight, totalPrice)}
                   disabled={isSubmitting}
-                  className="flex-[2] py-2 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 shadow-sm shadow-green-200 transition-all disabled:bg-green-400"
+                  className="flex-[2] py-2 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 shadow-sm shadow-green-200 transition-all disabled:bg-green-400 cursor-pointer"
                 >
                   {isSubmitting ? 'Sending...' : `Buy for ₹${totalPrice}`}
                 </button>

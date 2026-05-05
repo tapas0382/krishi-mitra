@@ -154,7 +154,7 @@ export default function Marketplace() {
           <input type="text" readOnly value={locationStr} placeholder="Click 'Use My Location' to search nearby..." className="w-full p-3 border border-slate-300 rounded-lg bg-slate-50 outline-none text-slate-600" />
           <div className="w-full md:w-auto flex items-center gap-3">
             <label className="text-slate-600 font-medium whitespace-nowrap">Radius:</label>
-            <select value={radius} onChange={handleRadiusChange} className="p-3 border border-slate-300 rounded-lg outline-none bg-white text-slate-900 min-w-[100px]">
+            <select value={radius} onChange={handleRadiusChange} className="p-3 border border-slate-300 rounded-lg outline-none bg-white text-slate-900 min-w-[100px] cursor-pointer">
               <option value="5">5 km</option>
               <option value="10">10 km</option>
               <option value="20">20 km</option>
@@ -193,7 +193,7 @@ export default function Marketplace() {
                     <span className="text-green-600 font-extrabold text-xl">₹{tool.pricePerHour}<span className="text-sm text-slate-500 font-normal">/hr</span></span>
                     <button 
                       onClick={() => setSelectedTool(tool)}
-                      className="bg-slate-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-800 transition-colors"
+                      className="bg-slate-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-800 transition-colors  cursor-pointer"
                     >
                       Book Now
                     </button>
@@ -214,7 +214,7 @@ export default function Marketplace() {
             <div className="p-6 md:w-1/2 bg-white">
               <div className="flex justify-between items-start mb-6">
                 <h2 className="text-2xl font-bold text-slate-900">Request to Rent</h2>
-                <button onClick={() => setSelectedTool(null)} className="md:hidden text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
+                <button onClick={() => setSelectedTool(null)} className="md:hidden text-slate-400 hover:text-slate-600 text-xl font-bold cursor-pointer">×</button>
               </div>
 
               <div className="bg-slate-50 p-4 rounded-lg mb-6 border border-slate-100">
@@ -245,7 +245,7 @@ export default function Marketplace() {
                   <span className="font-extrabold text-2xl text-slate-900">₹{selectedTool.pricePerHour * bookingHours}</span>
                 </div>
 
-                <button type="submit" disabled={bookingLoading} className="w-full bg-green-600 text-white p-3 rounded-lg font-bold hover:bg-green-700 transition-colors disabled:bg-slate-400 mt-2">
+                <button type="submit" disabled={bookingLoading} className="w-full bg-green-600 text-white p-3 rounded-lg font-bold hover:bg-green-700 transition-colors disabled:bg-slate-400 mt-2 cursor-pointer">
                   {bookingLoading ? 'Sending Request...' : 'Send Rental Request'}
                 </button>
               </form>
@@ -255,7 +255,7 @@ export default function Marketplace() {
             <div className="p-6 md:w-1/2 bg-slate-50 border-l border-slate-100 flex flex-col max-h-[600px]">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-slate-800">Community Reviews</h3>
-                <button onClick={() => setSelectedTool(null)} className="hidden md:block text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
+                <button onClick={() => setSelectedTool(null)} className="hidden md:block text-slate-400 hover:text-slate-600 text-xl font-bold cursor-pointer">×</button>
               </div>
 
               <div className="overflow-y-auto flex-1 pr-2 space-y-4">

@@ -201,7 +201,7 @@ export default function Inbox() {
                   <li key={contact.id}>
                     <button 
                       onClick={() => setSelectedContact(contact)}
-                      className={`w-full text-left p-4 hover:bg-slate-100 transition-colors flex items-center gap-3 ${selectedContact?.id === contact.id ? 'bg-green-50 border-l-4 border-green-600' : ''}`}
+                      className={`w-full cursor-pointer text-left p-4 hover:bg-slate-100 transition-colors flex items-center gap-3 ${selectedContact?.id === contact.id ? 'bg-green-50 border-l-4 border-green-600' : ''}`}
                     >
                       <div className="w-10 h-10 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-lg">
                         {contact.name.charAt(0).toUpperCase()}
@@ -264,7 +264,7 @@ export default function Inbox() {
                     <button 
                       type="submit" 
                       disabled={!newMessage.trim()}
-                      className="bg-slate-900 text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-800 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed"
+                      className="bg-slate-900 text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-800 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed cursor-pointer"
                     >
                       Send
                     </button>
