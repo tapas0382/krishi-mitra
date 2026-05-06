@@ -12,6 +12,7 @@ export default function Navbar() {
   
   const [user, setUser] = useState(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Notification States
   const [notifications, setNotifications] = useState([]);
@@ -21,6 +22,7 @@ export default function Navbar() {
   // Refs for closing menus when clicking outside
   const dropdownRef = useRef(null);
   const profileRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   // --- FETCH FUNCTION ---
   const fetchNotifications = async (userId) => {
@@ -66,6 +68,10 @@ export default function Navbar() {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
       }
+      // Close mobile menu
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+        setIsMobileMenuOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -108,7 +114,7 @@ export default function Navbar() {
     return (
       <Link 
         href={href} 
-        className={`text-sm font-bold transition-colors ${className} ${
+        className={`text-[13px] sm:text-sm font-bold transition-colors whitespace-nowrap ${className} ${
           isActive ? `${activeText} border-b-2 pb-1` : inactiveText
         }`}
       >
@@ -120,10 +126,10 @@ export default function Navbar() {
   return (
     <nav className={`sticky top-0 z-50 shadow-sm transition-colors duration-300 ${isAdminRoute ? 'bg-slate-900 border-b border-slate-800' : 'bg-white border-b border-slate-100'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
+        <div className="flex items-center justify-between h-16">
           
           {/* LEFT SIDE: LOGO & BADGE */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
             <span className="text-2xl">🌾</span>
             <span className={`font-extrabold text-xl tracking-tight ${isAdminRoute ? 'text-white' : 'text-slate-900'}`}>
               Krishi Mitra
@@ -136,14 +142,34 @@ export default function Navbar() {
           </Link>
 
           {/* RIGHT SIDE: LINKS & AUTH */}
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center gap-3 sm:gap-6">
+            {/* Mobile Hamburger */}
+            {!isAdminRoute && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(!isMobileMenuOpen);
+                  setShowDropdown(false);
+                  setIsProfileOpen(false);
+                }}
+                className={`sm:hidden p-2 rounded-full transition-colors cursor-pointer ${
+                  isAdminRoute ? 'text-slate-300 hover:text-white hover:bg-slate-800' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+                aria-label="Open menu"
+                aria-expanded={isMobileMenuOpen}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            )}
             
             {/* Conditional Links based on Route */}
             {!isAdminRoute && (
               <>
                 {/* 1. VISIBLE TO EVERYONE */}
-                <NavLink href="/tools">Rent Tools</NavLink>
-                <NavLink href="/seeds">Seed Exchange</NavLink>
+                <NavLink href="/tools" className="hidden sm:inline-flex">Rent Tools</NavLink>
+                <NavLink href="/seeds" className="hidden sm:inline-flex">Seed Exchange</NavLink>
                 
                 {/* 2. AI MITRA: Visible to all, but safely goes to /login if logged out to prevent the Back Button trap */}
                 {/* <NavLink 
@@ -158,17 +184,17 @@ export default function Navbar() {
                   <>
                     <NavLink 
                       href={user ? "/smart-farm" : "/login"} 
-                      className="text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                      className="hidden sm:inline-flex text-indigo-600 hover:text-indigo-800 items-center gap-1"
                     >
                       <span className="text-lg">✨</span> AI Mitra
                     </NavLink>
 
-                    <NavLink href="/messages">Messages</NavLink>
-                    <NavLink href="/dashboard">Dashboard</NavLink>
+                    <NavLink href="/messages" className="hidden sm:inline-flex">Messages</NavLink>
+                    <NavLink href="/dashboard" className="hidden sm:inline-flex">Dashboard</NavLink>
                     
                     {/* Admin Door */}
                     {user.role === 'admin' && (
-                      <Link href="/admin" className="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg font-bold text-sm hover:bg-red-100 transition-all">
+                      <Link href="/admin" className="hidden sm:inline-flex bg-red-50 text-red-600 px-3 py-1.5 rounded-lg font-bold text-sm hover:bg-red-100 transition-all">
                         👑 Admin Panel
                       </Link>
                     )}
@@ -179,7 +205,7 @@ export default function Navbar() {
 
             {/* USER PROFILE & NOTIFICATIONS */}
             {user ? (
-              <div className={`flex items-center space-x-4 border-l pl-6 ml-2 ${isAdminRoute ? 'border-slate-700' : 'border-slate-200'}`}>
+              <div className={`flex items-center gap-2 sm:gap-4 sm:border-l sm:pl-6 sm:ml-2 ${isAdminRoute ? 'sm:border-slate-700' : 'sm:border-slate-200'}`}>
                 
                 {/* 🔔 THE NOTIFICATION BELL */}
                 <div className="relative" ref={dropdownRef}>
@@ -198,7 +224,7 @@ export default function Navbar() {
 
                   {/* Dropdown Menu (Automatically switches to dark mode in admin) */}
                   {showDropdown && (
-                    <div className={`absolute right-0 mt-2 w-80 rounded-xl shadow-xl border overflow-hidden z-50 ${isAdminRoute ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                    <div className={`absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-[22rem] rounded-xl shadow-xl border overflow-hidden z-50 ${isAdminRoute ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                       <div className={`p-4 border-b flex justify-between items-center ${isAdminRoute ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-100'}`}>
                         <h3 className={`font-bold ${isAdminRoute ? 'text-white' : 'text-slate-800'}`}>Notifications</h3>
                         {unreadCount > 0 && <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full font-bold">{unreadCount} New</span>}
@@ -262,14 +288,132 @@ export default function Navbar() {
                 </div>
               </div>
             ) : (
-              <div className={`flex items-center space-x-4 border-l pl-6 ml-2 ${isAdminRoute ? 'border-slate-700' : 'border-slate-200'}`}>
-                <Link href="/login" className={`font-medium ${isAdminRoute ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}>Log in</Link>
-                <Link href="/register" className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-green-700 transition-colors">Sign up</Link>
+              <div className={`flex items-center gap-3 sm:gap-4 sm:border-l sm:pl-6 sm:ml-2 ${isAdminRoute ? 'sm:border-slate-700' : 'sm:border-slate-200'}`}>
+                <Link href="/login" className={`hidden sm:inline-flex font-medium ${isAdminRoute ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}>Log in</Link>
+                <Link href="/register" className="hidden sm:inline-flex bg-green-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-green-700 transition-colors">Sign up</Link>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Mobile Slide-over Menu */}
+      {!isAdminRoute && (
+        <div
+          className={`sm:hidden fixed inset-0 z-50 ${isMobileMenuOpen ? '' : 'pointer-events-none'}`}
+          aria-hidden={!isMobileMenuOpen}
+        >
+          {/* Backdrop */}
+          <div
+            className={`absolute inset-0 bg-black/40 transition-opacity ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0'}`}
+          />
+
+          {/* Panel */}
+          <div
+            ref={mobileMenuRef}
+            className={`absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white border-l border-slate-200 shadow-2xl transition-transform duration-200 ${
+              isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+          >
+            <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200">
+              <div className="font-extrabold text-slate-900 flex items-center gap-2">
+                <span className="text-xl">🌾</span> Menu
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 rounded-full hover:bg-slate-100 text-slate-700 cursor-pointer"
+                aria-label="Close menu"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-4 space-y-2">
+              <Link
+                href="/tools"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-4 py-3 rounded-xl font-bold text-slate-800 hover:bg-slate-50 border border-slate-100"
+              >
+                🚜 Rent Tools
+              </Link>
+              <Link
+                href="/seeds"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-4 py-3 rounded-xl font-bold text-slate-800 hover:bg-slate-50 border border-slate-100"
+              >
+                🌱 Seed Exchange
+              </Link>
+
+              {user ? (
+                <>
+                  <Link
+                    href="/smart-farm"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-4 py-3 rounded-xl font-bold text-slate-800 hover:bg-slate-50 border border-slate-100"
+                  >
+                    ✨ AI Mitra
+                  </Link>
+                  <Link
+                    href="/messages"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-4 py-3 rounded-xl font-bold text-slate-800 hover:bg-slate-50 border border-slate-100"
+                  >
+                    💬 Messages
+                  </Link>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-4 py-3 rounded-xl font-bold text-slate-800 hover:bg-slate-50 border border-slate-100"
+                  >
+                    📊 Dashboard
+                  </Link>
+
+                  {user.role === 'admin' && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block px-4 py-3 rounded-xl font-bold text-red-600 hover:bg-red-50 border border-red-100"
+                    >
+                      👑 Admin Panel
+                    </Link>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full text-left px-4 py-3 rounded-xl font-bold text-red-600 hover:bg-red-50 border border-red-100 cursor-pointer"
+                  >
+                    🚪 Log Out
+                  </button>
+                </>
+              ) : (
+                <div className="pt-2 space-y-2">
+                  <Link
+                    href="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-4 py-3 rounded-xl font-bold text-slate-800 hover:bg-slate-50 border border-slate-100"
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-4 py-3 rounded-xl font-bold text-white bg-green-600 hover:bg-green-700 border border-green-600"
+                  >
+                    Sign up
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

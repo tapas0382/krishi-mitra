@@ -181,13 +181,13 @@ function MessagesContent() {
       <Navbar />
       
       <main className="max-w-6xl mx-auto px-4 py-8 w-full flex-1 flex flex-col">
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-6">Messages</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-4 sm:mb-6">Messages</h1>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 flex-1 flex overflow-hidden min-h-[600px] max-h-[700px]">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 flex-1 flex flex-col md:flex-row overflow-hidden min-h-[70vh] sm:min-h-[600px] max-h-[calc(100vh-10rem)] sm:max-h-[700px]">
           
           {/* Left Sidebar: Contacts List */}
-          <div className="w-1/3 border-r border-slate-200 bg-slate-50 overflow-y-auto">
-            <div className="p-4 border-b border-slate-200 bg-white">
+          <div className={`w-full md:w-1/3 md:border-r border-slate-200 bg-slate-50 overflow-y-auto md:max-h-none ${selectedContact ? 'hidden md:block' : 'block'} ${selectedContact ? '' : 'max-h-none'}`}>
+            <div className="p-3 sm:p-4 border-b border-slate-200 bg-white sticky top-0 z-10">
               <h2 className="font-bold text-slate-800">Your Connections</h2>
             </div>
             
@@ -201,12 +201,12 @@ function MessagesContent() {
                   <li key={contact.id}>
                     <button 
                       onClick={() => setSelectedContact(contact)}
-                      className={`w-full cursor-pointer text-left p-4 hover:bg-slate-100 transition-colors flex items-center gap-3 ${selectedContact?.id === contact.id ? 'bg-green-50 border-l-4 border-green-600' : ''}`}
+                      className={`w-full cursor-pointer text-left p-3 sm:p-4 hover:bg-slate-100 transition-colors flex items-center gap-3 ${selectedContact?.id === contact.id ? 'bg-green-50 border-l-4 border-green-600' : ''}`}
                     >
                       <div className="w-10 h-10 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-lg">
                         {contact.name.charAt(0).toUpperCase()}
                       </div>
-                      <span className="font-medium text-slate-900">{contact.name}</span>
+                      <span className="font-medium text-slate-900 truncate">{contact.name}</span>
                     </button>
                   </li>
                 ))}
@@ -215,19 +215,27 @@ function MessagesContent() {
           </div>
 
           {/* Right Area: Chat Window */}
-          <div className="w-2/3 flex flex-col bg-white">
+          <div className={`w-full md:w-2/3 flex flex-col bg-white flex-1 min-h-0 ${selectedContact ? 'block' : 'hidden md:flex'}`}>
             {selectedContact ? (
               <>
                 {/* Chat Header */}
-                <div className="p-4 border-b border-slate-200 bg-white flex items-center gap-3 shadow-sm z-10">
+                <div className="p-3 sm:p-4 border-b border-slate-200 bg-white flex items-center gap-3 shadow-sm z-10">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedContact(null)}
+                    className="md:hidden -ml-1 p-2 rounded-lg hover:bg-slate-100 text-slate-700 cursor-pointer"
+                    aria-label="Back to chats"
+                  >
+                    ←
+                  </button>
                   <div className="w-10 h-10 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">
                     {selectedContact.name.charAt(0).toUpperCase()}
                   </div>
-                  <h3 className="font-bold text-slate-900">{selectedContact.name}</h3>
+                  <h3 className="font-bold text-slate-900 truncate">{selectedContact.name}</h3>
                 </div>
 
                 {/* Messages Area */}
-                <div className="flex-1 p-6 overflow-y-auto bg-slate-50 space-y-4">
+                <div className="flex-1 p-3 sm:p-6 overflow-y-auto bg-slate-50 space-y-4 min-h-0">
                   {messages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-slate-400">
                       <p>No messages yet.</p>
@@ -238,7 +246,7 @@ function MessagesContent() {
                       const isMe = msg.sender._id === user.id;
                       return (
                         <div key={msg._id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[70%] p-3 rounded-2xl ${isMe ? 'bg-green-600 text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'}`}>
+                          <div className={`max-w-[85%] sm:max-w-[70%] p-3 rounded-2xl ${isMe ? 'bg-green-600 text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'}`}>
                             <p>{msg.content}</p>
                             <span className={`text-[10px] mt-1 block ${isMe ? 'text-green-200' : 'text-slate-400'}`}>
                               {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
@@ -252,7 +260,7 @@ function MessagesContent() {
                 </div>
 
                 {/* Message Input */}
-                <div className="p-4 bg-white border-t border-slate-200">
+                <div className="p-3 sm:p-4 bg-white border-t border-slate-200">
                   <form onSubmit={sendMessage} className="flex gap-2">
                     <input 
                       type="text" 
@@ -264,7 +272,7 @@ function MessagesContent() {
                     <button 
                       type="submit" 
                       disabled={!newMessage.trim()}
-                      className="bg-slate-900 text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-800 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed cursor-pointer"
+                      className="bg-slate-900 text-white px-4 sm:px-6 py-3 rounded-lg font-bold hover:bg-slate-800 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed cursor-pointer"
                     >
                       Send
                     </button>
