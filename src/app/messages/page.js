@@ -1,10 +1,10 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../../components/navbar';
 import { useSearchParams } from 'next/navigation';
 
-export default function Inbox() {
+function MessagesContent() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   
@@ -282,5 +282,14 @@ export default function Inbox() {
         </div>
       </main>
     </div>
+  );
+}
+
+// At the bottom of your file:
+export default function Inbox() {
+  return (
+    <Suspense fallback={<div className="p-4 text-center">Loading messages...</div>}>
+      <MessagesContent />
+    </Suspense>
   );
 }
