@@ -206,8 +206,20 @@ export default function Dashboard() {
               
               {/* Combine and filter the lists */}
               {(() => {
-                const activeTools = (incomingRequests || []).filter(r => r.status === 'pending' || r.status === 'accepted').map(r => ({ ...r, type: 'tool' }));
-                const activeSeeds = (seedOrders || []).filter(o => o.status === 'pending' || o.status === 'accepted').map(o => ({ ...o, type: 'seed' }));
+                const activeTools = (incomingRequests || [])
+                  .filter(r => {
+                    if (r.status === 'accepted') return true;
+                    if (r.status === 'pending') return r.paymentStatus === 'held';
+                    return false;
+                  })
+                  .map(r => ({ ...r, type: 'tool' }));
+                const activeSeeds = (seedOrders || [])
+                  .filter(o => {
+                    if (o.status === 'accepted') return true;
+                    if (o.status === 'pending') return o.paymentStatus === 'held';
+                    return false;
+                  })
+                  .map(o => ({ ...o, type: 'seed' }));
                 const combinedActive = [...activeTools, ...activeSeeds];
                 
                 if (combinedActive.length === 0) {
@@ -242,6 +254,11 @@ export default function Dashboard() {
                           <strong>{item.type === 'tool' ? 'Renter:' : 'Buyer:'}</strong> {item.type === 'tool' ? item.renter?.name : item.buyer?.name}
                         </p>
                         <p className="text-green-600 font-bold mt-2">Earnings: ₹{item.totalPrice}</p>
+                        {(item.type === 'tool' || item.type === 'seed') && (
+                          <p className="text-xs text-slate-500 mt-1">
+                            Payment: <span className="font-semibold uppercase">{item.paymentStatus || 'unpaid'}</span>
+                          </p>
+                        )}
                         
                         {/* Action Buttons */}
                         {item.status === 'pending' && (
@@ -354,10 +371,15 @@ export default function Dashboard() {
                             {item.type === 'tool' ? (
                               <p className="text-sm text-slate-600"><strong>Date:</strong> {new Date(item.startDate).toLocaleDateString()} for {item.hoursRequested} hours</p>
                             ) : (
-                              <p className="text-sm text-slate-600"><strong>Ordered:</strong> {new Date(item.createdAt).toLocaleDateString()} (Qty: {item.quantity || 1})</p>
+                              <p className="text-sm text-slate-600"><strong>Ordered:</strong> {new Date(item.createdAt).toLocaleDateString()} (Qty: {item.quantityKg || 1} kg)</p>
                             )}
                             
                             <p className="text-slate-900 font-bold mt-1">Cost: ₹{item.totalPrice}</p>
+                            {item.type === 'tool' && (
+                              <p className="text-xs text-slate-500 mt-1">
+                                Payment: <span className="font-semibold uppercase">{item.paymentStatus || 'unpaid'}</span>
+                              </p>
+                            )}
 
                             {/* Review Button for completed tools
                             {item.status === 'completed' && (

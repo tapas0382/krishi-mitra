@@ -10,7 +10,7 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const initialTab = searchParams.get('tab') === 'purchases' ? 'purchases' : 'sales';
-  const [activeTab, setActiveTab] = useState('sales');
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   useEffect(() => {
     const tabFromUrl = searchParams.get('tab');
@@ -58,7 +58,7 @@ export default function HistoryPage() {
 
       // Filter and Sort
       const pastItems = combined.filter(item => item.status === 'completed' || item.status === 'rejected');
-      pastItems.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.createdAt || a.updatedAt));
+      pastItems.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
       
       setHistoryItems(pastItems);
     } catch (error) {
@@ -69,6 +69,11 @@ export default function HistoryPage() {
   };
 
   if (loading) return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-xl font-bold text-green-600">Loading your agricultural history... 🌱</div>;
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    router.replace(`/dashboard/history?tab=${tab}`);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
@@ -88,7 +93,7 @@ export default function HistoryPage() {
         {/* THE TAB MENU */}
 <div className="flex bg-slate-200 p-1 rounded-xl mb-8 w-full max-w-md mx-auto md:mx-0">
   <button
-    onClick={() => setActiveTab('sales')}
+    onClick={() => handleTabChange('sales')}
     className={`flex-1 py-2 px-4 rounded-lg font-bold text-sm transition-all ${
       activeTab === 'sales' 
         ? 'bg-white text-slate-800 shadow-sm' 
@@ -98,7 +103,7 @@ export default function HistoryPage() {
     📈 Earnings & Sales
   </button>
   <button
-    onClick={() => setActiveTab('purchases')}
+    onClick={() => handleTabChange('purchases')}
     className={`flex-1 py-2 px-4 rounded-lg font-bold text-sm transition-all ${
       activeTab === 'purchases' 
         ? 'bg-white text-slate-800 shadow-sm' 
@@ -120,8 +125,10 @@ export default function HistoryPage() {
             {/* SMART FILTER LOGIC */}
             {historyItems
             .filter(item => {
-              // Check if the user is the one who paid for it
-              const isPurchase = item.buyer?._id === user?.id || item.renter?._id === user?.id || item.buyer === user?.id || item.renter === user?.id;
+              const userId = String(user?.id || "");
+              const buyerId = String(item.buyer?._id || item.buyer || "");
+              const renterId = String(item.renter?._id || item.renter || "");
+              const isPurchase = buyerId === userId || renterId === userId;
               
               if (activeTab === 'purchases') return isPurchase;
               if (activeTab === 'sales') return !isPurchase; // If they didn't buy it, they sold it
@@ -144,7 +151,7 @@ export default function HistoryPage() {
                     
                     {/* Dynamic Label: Did you buy it, or did you sell it? */}
                     <p className="text-slate-600 font-medium text-sm">
-                      {(item.buyer?._id === user?.id || item.renter?._id === user?.id) 
+                      {(String(item.buyer?._id || item.buyer || "") === String(user?.id || "") || String(item.renter?._id || item.renter || "") === String(user?.id || "")) 
                         ? <span>Purchased from: <span className="text-slate-900 font-bold">{item.owner?.name || item.seller?.name}</span></span>
                         : <span>{item.type === 'tool' ? 'Rented to:' : 'Sold to:'} <span className="text-slate-900 font-bold">{item.renter?.name || item.buyer?.name}</span></span>
                       }
@@ -153,7 +160,7 @@ export default function HistoryPage() {
                     <p className="text-green-700 font-extrabold mt-1 text-lg">₹{item.totalPrice}</p>
 
                     {/* THE REVIEW BUTTON: Only show if it's completed AND the user was the buyer/renter */}
-                    {item.status === 'completed' && (item.buyer?._id === user?.id || item.renter?._id === user?.id) && (
+                    {item.status === 'completed' && (String(item.buyer?._id || item.buyer || "") === String(user?.id || "") || String(item.renter?._id || item.renter || "") === String(user?.id || "")) && (
                       <button 
                         onClick={() => {/* Trigger your review modal here */}}
                         className="mt-3 text-sm bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-300 px-4 py-2 rounded-lg font-bold transition-colors"

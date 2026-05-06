@@ -103,7 +103,7 @@ export default function Marketplace() {
     setBookingMessage('');
 
     try {
-      const res = await fetch('/api/bookings', {
+      const checkoutRes = await fetch('/api/bookings/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -114,21 +114,75 @@ export default function Marketplace() {
         }),
       });
 
-      const data = await res.json();
-      if (data.success) {
-        setBookingMessage('✅ Booking request sent successfully!');
-        setTimeout(() => {
-          setSelectedTool(null);
-          setBookingMessage('');
-        }, 2000);
-      } else {
-        setBookingMessage('❌ ' + data.message);
+      const checkoutData = await checkoutRes.json();
+      if (!checkoutData.success) {
+        setBookingMessage('❌ ' + checkoutData.message);
+        return;
       }
+
+      await loadRazorpayScript();
+
+      const razorpay = new window.Razorpay({
+        key: checkoutData.keyId,
+        amount: checkoutData.amount,
+        currency: checkoutData.currency,
+        name: "Krishi Mitra",
+        description: `Rental hold for ${selectedTool.name}`,
+        order_id: checkoutData.razorpayOrderId,
+        prefill: {
+          name: user.name || "",
+          contact: user.phone || ""
+        },
+        handler: async (response) => {
+          const verifyRes = await fetch('/api/bookings/confirm-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              bookingId: checkoutData.bookingId,
+              ...response
+            }),
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            setBookingMessage('✅ Payment successful. Request sent to owner for approval.');
+            setTimeout(() => {
+              setSelectedTool(null);
+              setBookingMessage('');
+            }, 2000);
+          } else {
+            setBookingMessage('❌ Payment verification failed: ' + verifyData.message);
+          }
+        },
+        theme: {
+          color: "#16a34a"
+        }
+      });
+
+      razorpay.on("payment.failed", function () {
+        setBookingMessage("❌ Payment failed. Please try again.");
+      });
+
+      razorpay.open();
     } catch (error) {
       setBookingMessage('❌ Something went wrong.');
     } finally {
       setBookingLoading(false);
     }
+  };
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve, reject) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => reject(new Error("Failed to load Razorpay checkout SDK"));
+      document.body.appendChild(script);
+    });
   };
 
   // Helper to render stars
@@ -246,7 +300,7 @@ export default function Marketplace() {
                 </div>
 
                 <button type="submit" disabled={bookingLoading} className="w-full bg-green-600 text-white p-3 rounded-lg font-bold hover:bg-green-700 transition-colors disabled:bg-slate-400 mt-2 cursor-pointer">
-                  {bookingLoading ? 'Sending Request...' : 'Send Rental Request'}
+                  {bookingLoading ? 'Starting Checkout...' : 'Pay & Send Rental Request'}
                 </button>
               </form>
             </div>

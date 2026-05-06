@@ -39,8 +39,12 @@ export async function GET(request) {
     const lng = searchParams.get('lng');
     const radius = searchParams.get('radius') || 10;
     const type = searchParams.get('type'); // filter by 'offer' or 'request'
+    const sellerId = searchParams.get('sellerId');
 
     let query = { isAvailable: true };
+    if (sellerId) {
+      query = { owner: sellerId };
+    }
     if (type) query.type = type;
 
     if (lat && lng) {

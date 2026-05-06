@@ -15,6 +15,28 @@ const BookingSchema = new mongoose.Schema(
       default: 0
     },
     totalPrice: { type: Number, required: true },
+    paymentAmountPaise: { type: Number, default: 0 },
+    paymentCurrency: { type: String, default: 'INR' },
+    payment: { type: mongoose.Schema.Types.ObjectId, ref: 'RentalPayment' },
+    paymentStatus: {
+      type: String,
+      enum: [
+        'unpaid',
+        'hold_created',
+        'held',
+        'capture_pending',
+        'captured',
+        'refund_pending',
+        'refunded',
+        'failed'
+      ],
+      default: 'unpaid'
+    },
+    ownerDecisionAt: { type: Date },
+    acceptedAt: { type: Date },
+    rejectedAt: { type: Date },
+    completedAt: { type: Date },
+    rejectionReason: { type: String, trim: true },
     
     status: {
       type: String,

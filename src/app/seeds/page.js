@@ -93,7 +93,7 @@ export default function SeedExchange() {
   };
 
   // NEW: Submit the formal order to the API
-  const handleConfirmOrder = async (finalWeight, finalPrice) => {
+  const handleConfirmOrder = async (finalWeight) => {
     setIsSubmitting(true);
 
     // const packetCount = parseInt(orderQuantity);
@@ -102,31 +102,80 @@ export default function SeedExchange() {
     // const totalCost = packetCount * pricePerPacket;
 
     try {
-      const res = await fetch('/api/seed-orders', {
+      const checkoutRes = await fetch('/api/seed-orders/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           seedId: orderModalSeed._id,
           buyerId: user.id,
-          sellerId: orderModalSeed.owner._id,
-          quantityKg: finalWeight,
-          totalPrice: finalPrice
+          quantityKg: finalWeight
         })
       });
 
-      const data = await res.json();
-      if (data.success) {
-        alert(`Order placed successfully! ${orderModalSeed.owner?.name || 'The seller'} has been notified.`);
-        setOrderModalSeed(null); // Close the modal
-      }else {
-        alert("Error: " + data.message);
+      const checkoutData = await checkoutRes.json();
+      if (!checkoutData.success) {
+        alert("Error: " + checkoutData.message);
+        return;
       }
+
+      await loadRazorpayScript();
+
+      const razorpay = new window.Razorpay({
+        key: checkoutData.keyId,
+        amount: checkoutData.amount,
+        currency: checkoutData.currency,
+        name: "Krishi Mitra",
+        description: `Seed order hold for ${orderModalSeed.name}`,
+        order_id: checkoutData.razorpayOrderId,
+        prefill: {
+          name: user.name || "",
+          contact: user.phone || ""
+        },
+        handler: async (response) => {
+          const verifyRes = await fetch('/api/seed-orders/confirm-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              seedOrderId: checkoutData.seedOrderId,
+              ...response
+            })
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            alert(`Payment successful! ${orderModalSeed.owner?.name || 'The seller'} has been notified.`);
+            setOrderModalSeed(null);
+          } else {
+            alert("Payment verification failed: " + verifyData.message);
+          }
+        },
+        theme: { color: "#16a34a" }
+      });
+
+      razorpay.on("payment.failed", function () {
+        alert("Payment failed. Please try again.");
+      });
+
+      razorpay.open();
     } catch (error) {
       console.error("Order failed", error);
       alert("Failed to place order.");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve, reject) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => reject(new Error("Failed to load Razorpay checkout SDK"));
+      document.body.appendChild(script);
+    });
   };
 
   return (
@@ -322,11 +371,11 @@ export default function SeedExchange() {
                 </Link>
 
                 <button 
-                  onClick={() => handleConfirmOrder(totalWeight, totalPrice)}
+                  onClick={() => handleConfirmOrder(totalWeight)}
                   disabled={isSubmitting}
                   className="flex-[2] py-2 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 shadow-sm shadow-green-200 transition-all disabled:bg-green-400 cursor-pointer"
                 >
-                  {isSubmitting ? 'Sending...' : `Buy for ₹${totalPrice}`}
+                  {isSubmitting ? 'Starting Checkout...' : `Pay & Buy for ₹${totalPrice}`}
                 </button>
               </div>
             </div>
