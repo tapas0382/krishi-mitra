@@ -1,9 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function HistoryPage() {
+function HistoryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [historyItems, setHistoryItems] = useState([]);
@@ -185,5 +185,14 @@ export default function HistoryPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function HistoryPage() {
+  return (
+    // The fallback shows briefly while the URL is being read
+    <Suspense fallback={<div className="p-4 text-center">Loading history...</div>}>
+      <HistoryContent />
+    </Suspense>
   );
 }
